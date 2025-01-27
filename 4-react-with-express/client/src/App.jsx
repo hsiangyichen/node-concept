@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
-// const BASE_URL = "http://localhost:8080/api/v1/";
-
-const BASE_URL = import.meta.env.VITE_URL;
+/* ------------------------ Use local variable vs environment variable ------------------------ */
+const BASE_URL = "http://localhost:8080/api/v1/";
+// const BASE_URL = import.meta.env.VITE_URL;
 
 function App() {
   const [students, setStudents] = useState([]);
   const formRef = useRef();
 
+  /* --------------------------- fetch all students --------------------------- */
   const fetchAllStudents = async () => {
     try {
       const response = await axios.get(`${BASE_URL}students`);
@@ -19,13 +20,12 @@ function App() {
   };
 
   useEffect(() => {
-    // Get Students from the back-end server here
     fetchAllStudents();
   }, []);
 
-  const addStudent = async (e) => {
+  /* ----------------------- Handle adding a new student ---------------------- */
+  const handleAddStudent = async (e) => {
     e.preventDefault();
-    // Add students to the back-end server, and then update the state with the response
     try {
       const newStudent = {
         name: formRef.current.name.value,
@@ -44,9 +44,20 @@ function App() {
     }
   };
 
+  /* ------------------------ handle deleting a student ----------------------- */
+  const handleDeleteStudent = async (id) => {
+    try {
+      const response = await axios.delete(`${BASE_URL}students/${id}`);
+      setStudents(response.data);
+    } catch (error) {
+      console.log("Error from deleting a student:", error);
+    }
+  };
+
   const renderedStudents = students.map((student) => (
     <li key={student.id} className="list-group-item">
       {`${student.name}: ${student.program}, ${student.grade}`}
+      <button onClick={() => handleDeleteStudent(student.id)}>Remove</button>
     </li>
   ));
 
@@ -55,7 +66,7 @@ function App() {
       <div className="row">
         <div className="col-4">
           <h2>Add Student</h2>
-          <form onSubmit={addStudent} ref={formRef}>
+          <form onSubmit={handleAddStudent} ref={formRef}>
             <div className="form-group">
               <label htmlFor="name">Name</label>
               <input

@@ -57,10 +57,12 @@ let students = [
   },
 ];
 
+// GET route: Retrieve the list of all students
 app.get("/api/v1/students", (req, res) => {
   res.json(students);
 });
 
+// POST route: Add a new student to the list
 app.post("/api/v1/students", (req, res) => {
   const { name, program, grade } = req.body;
   const newStudent = {
@@ -71,6 +73,14 @@ app.post("/api/v1/students", (req, res) => {
   };
   students.push(newStudent);
   res.json(newStudent);
+});
+
+// DELETE route: Delete a student from the list
+app.delete("/api/v1/students/:id", (req, res) => {
+  const { id } = req.params;
+  students = students.filter((student) => student.id !== id);
+
+  res.json(students);
 });
 
 app.listen(port, () => console.log(`Listening on ${port}`));
