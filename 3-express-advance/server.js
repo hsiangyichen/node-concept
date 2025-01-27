@@ -2,15 +2,13 @@ import express from "express";
 import foodRoutes from "./routes/foodRoutes.js";
 
 const app = express();
-app.use(express.static("public"));
-
 const port = 8080;
 
-app.get("/", (req, res) => {
-  res.send("Welcome to the server!");
-});
+/* --------------------------- Application Config --------------------------- */
+app.use(express.static("public"));
+app.use("/photos", express.static("public/images"));
 
-// middleware
+/* ------------------------------- Middleware ------------------------------- */
 app.use((req, res, next) => {
   console.log(`Request Path: ${req.originalUrl}, Time: ${Date.now()}`);
   next();
@@ -22,9 +20,14 @@ app.use((req, res, next) => {
 //   next();
 // });
 
-// endpoints
+/* -------------------------------- Routes ------------------------------- */
+app.get("/", (req, res) => {
+  res.send("Welcome to the server!");
+});
+
 app.use("/foods", foodRoutes);
 
+/* ---------------------------- Start the Server ---------------------------- */
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
