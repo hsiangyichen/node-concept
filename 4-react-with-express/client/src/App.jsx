@@ -9,7 +9,7 @@ function App() {
   const [students, setStudents] = useState([]);
   const formRef = useRef();
 
-  /* --------------------------- fetch all students --------------------------- */
+  /* --------------------------- Fetch all students --------------------------- */
   const fetchAllStudents = async () => {
     try {
       const response = await axios.get(`${BASE_URL}students`);
@@ -44,7 +44,7 @@ function App() {
     }
   };
 
-  /* ------------------------ handle deleting a student ----------------------- */
+  /* ------------------------ Handle deleting a student ----------------------- */
   const handleDeleteStudent = async (id) => {
     try {
       const response = await axios.delete(`${BASE_URL}students/${id}`);
