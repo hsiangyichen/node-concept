@@ -5,10 +5,11 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "migrate": "npx knex migrate:latest",
-    "migrate:down": "npx knex migrate:down",
-    "migrate:rollback": "npx knex migrate:rollback",
-    "seed": "npx knex seed:run"
+    "dev": "node --watch index.js",
+    "migrate": "knex migrate:latest",
+    "migrate:rollback": "knex migrate:rollback",
+    "migrate:make": "knex migrate:make",
+    "seed": "knex seed:run"
   },
   "keywords": [],
   "author": "",
