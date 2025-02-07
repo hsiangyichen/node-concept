@@ -1,0 +1,117 @@
+// imported by seeds/authors-books.js
+export default [
+  {
+    id: 1,
+    title: "The Hobbit",
+    author_id: 1,
+    published: 1937,
+  },
+  {
+    id: 2,
+    title: "The Fellowship of the Ring",
+    author_id: 1,
+    published: 1954,
+  },
+  {
+    id: 3,
+    title: "The Two Towers",
+    author_id: 1,
+    published: 1954,
+  },
+  {
+    id: 4,
+    title: "The Return of the King",
+    author_id: 1,
+    published: 1955,
+  },
+  {
+    id: 5,
+    title: "Jurassic Park",
+    author_id: 2,
+    published: 1990,
+  },
+  {
+    id: 6,
+    title: "The Lost World",
+    author_id: 2,
+    published: 1995,
+  },
+  {
+    id: 7,
+    title: "The Hitchhiker's Guide to the Galaxy",
+    author_id: 3,
+    published: 1979,
+  },
+  {
+    id: 8,
+    title: "The Restaurant at the End of the Universe",
+    author_id: 3,
+    published: 1980,
+  },
+  {
+    id: 9,
+    title: "Life, the Universe and Everything",
+    author_id: 3,
+    published: 1982,
+  },
+  {
+    id: 10,
+    title: "So Long, and Thanks for All the Fish",
+    author_id: 3,
+    published: 1984,
+  },
+  {
+    id: 11,
+    title: "Mostly Harmless",
+    author_id: 3,
+    published: 1992,
+  },
+  {
+    id: 12,
+    title: "Frankenstein",
+    author_id: 4,
+    published: 1818,
+  },
+  {
+    id: 13,
+    title: "The Long Way to a Small Angry Planet",
+    author_id: 5,
+    published: 2014,
+  },
+  {
+    id: 14,
+    title: "To Be Taught If Fortunate",
+    author_id: 5,
+    published: 2019,
+  },
+  {
+    id: 15,
+    title: "The Long Way Home",
+    author_id: 6,
+    published: 1951,
+  },
+  {
+    id: 16,
+    title: "A Closed and Common Orbit",
+    author_id: 5,
+    published: 2016,
+  },
+  {
+    id: 17,
+    title: "The Calculating Stars",
+    author_id: 7,
+    published: 2018,
+  },
+  {
+    id: 18,
+    title: "Kindred",
+    author_id: 8,
+    published: 1979,
+  },
+  {
+    id: 19,
+    title: "Dawn",
+    author_id: 8,
+    published: 1987,
+  },
+];
