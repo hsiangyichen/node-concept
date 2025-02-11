@@ -31,7 +31,7 @@ async function getAuthorById(req, res) {
         .status(404)
         .json({ message: `Could not find author with id: ${id}` });
     }
-    return res.json(author);
+    return res.json(existingAuthor);
   } catch (error) {
     console.error(`Error getting author with id ${id}:`, error);
     return res.status(500).json({
@@ -44,20 +44,65 @@ async function getAuthorById(req, res) {
 /* -------------------- Add a new author to the database -------------------- */
 
 async function addAuthor(req, res) {
-  const { author } = req.body;
+  const { author, birthYear, nationality } = req.body;
 
-  // Validate input: ensure author name is a non-empty string
-  if (!author || typeof author !== "string" || author.trim().length === 0) {
+  // Validate required fields
+  if (!author || !birthYear || !nationality) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  // Validate inputs
+  if (
+    author &&
+    (typeof author !== "string" ||
+      author.trim().length < 2 ||
+      author.trim().length > 100)
+  ) {
     return res
       .status(400)
-      .json({ message: "Author name is required and cannot be empty" });
+      .json({ message: "Author name must be between 2 and 100 characters." });
+  }
+
+  if (
+    birthYear &&
+    (isNaN(Number(birthYear)) ||
+      Number(birthYear) < 0 ||
+      Number(birthYear) > new Date().getFullYear())
+  ) {
+    return res.status(400).json({ message: "Invalid birth year." });
+  }
+
+  if (
+    nationality &&
+    (typeof nationality !== "string" ||
+      nationality.trim().length < 2 ||
+      nationality.trim().length > 50)
+  ) {
+    return res
+      .status(400)
+      .json({ message: "Nationality must be between 2 and 50 characters." });
   }
 
   try {
-    // Insert the new author and retrieve its ID
-    const [newAuthorId] = await db("authors").insert({ author });
+    // Prepare sanitized data
+    const authorData = {
+      author: author.trim(),
+      birthYear: Number(birthYear),
+      nationality: nationality.trim(),
+    };
 
-    return res.status(201).json({ id: newAuthorId, author });
+    // Insert the new author and retrieve its ID
+    const [newAuthorId] = await db("authors").insert(authorData);
+    const newAuthor = await db("authors")
+      .select(["id", "author", "birthYear", "nationality"])
+      .where({ id: newAuthorId })
+      .first();
+
+    // return res.status(201).json(newAuthor);
+    return res.status(201).json({
+      message: "Author created successfully",
+      author: newAuthor,
+    });
   } catch (error) {
     console.error("Error posting author:", error);
     return res
@@ -67,21 +112,52 @@ async function addAuthor(req, res) {
 }
 
 /* --------------------- Update an existing author by ID -------------------- */
-
 async function updateAuthor(req, res) {
   const { id } = req.params;
-  const { author } = req.body;
+  const { author, birthYear, nationality } = req.body;
+
+  // Ensure at least one field is provided for update
+  if (!author && !birthYear && !nationality) {
+    return res
+      .status(400)
+      .json({ message: "At least one field must be provided for update." });
+  }
 
   // Validate ID (ensure it's a positive integer)
   if (!id || isNaN(Number(id)) || Number(id) <= 0) {
     return res.status(400).json({ message: "Invalid author ID." });
   }
 
-  // Validate input: ensure author name is a non-empty string
-  if (!author || typeof author !== "string" || author.trim().length === 0) {
+  // Validate inputs
+  if (
+    author &&
+    (typeof author !== "string" ||
+      author.trim().length < 2 ||
+      author.trim().length > 100)
+  ) {
     return res
       .status(400)
-      .json({ message: "Author name is required and cannot be empty" });
+      .json({ message: "Author name must be between 2 and 100 characters." });
+  }
+
+  if (
+    birthYear &&
+    (isNaN(Number(birthYear)) ||
+      Number(birthYear) < 0 ||
+      Number(birthYear) > new Date().getFullYear())
+  ) {
+    return res.status(400).json({ message: "Invalid birth year." });
+  }
+
+  if (
+    nationality &&
+    (typeof nationality !== "string" ||
+      nationality.trim().length < 2 ||
+      nationality.trim().length > 50)
+  ) {
+    return res
+      .status(400)
+      .json({ message: "Nationality must be between 2 and 50 characters." });
   }
 
   try {
@@ -93,8 +169,18 @@ async function updateAuthor(req, res) {
         .json({ message: `Could not find author with id: ${id}` });
     }
 
-    // Check if the new author name is the same as the existing one
-    if (existingAuthor.author.trim() === author.trim()) {
+    // Prepare update fields with sanitized data
+    const updateFields = {};
+    if (author) updateFields.author = author.trim();
+    if (birthYear) updateFields.birthYear = Number(birthYear);
+    if (nationality) updateFields.nationality = nationality.trim();
+
+    // Check if all fields match the existing values
+    if (
+      Object.keys(updateFields).every(
+        (field) => existingAuthor[field] === updateFields[field]
+      )
+    ) {
       return res.status(200).json({
         message:
           "No updates were made as all inputs match the existing values.",
@@ -102,9 +188,15 @@ async function updateAuthor(req, res) {
     }
 
     // Update the author
-    await db("authors").where({ id }).update({ author });
+    await db("authors").where({ id }).update(updateFields);
 
-    return res.json({ message: "Author updated successfully" });
+    const updatedAuthor = await db("authors").where({ id }).first();
+
+    // return res.status(201).json(updatedAuthor);
+    return res.json({
+      message: "Author updated successfully",
+      author: updatedAuthor,
+    });
   } catch (error) {
     console.error(`Error updating author with id: ${id}:`, error);
     return res.status(500).json({
@@ -132,10 +224,24 @@ async function deleteAuthor(req, res) {
         .json({ message: `Could not find author with id: ${id}` });
     }
 
+    // Check if the author has associated books
+    const books = await db("books").where({ author_id: id });
+    if (books.length > 0) {
+      return res.status(400).json({
+        message: `Cannot delete author with id: ${id} because they have associated books.`,
+        associatedBooks: books,
+      });
+    }
+
     // Delete the author
     await db("authors").where({ id }).del();
 
-    return res.status(200).json({ message: "Author deleted successfully", id });
+    return res
+      .status(200)
+      .json({
+        message: "Author deleted successfully",
+        deletedAuthor: existingAuthor,
+      });
   } catch (error) {
     console.error(`Error deleting author with id: ${id}:`, error);
     return res.status(500).json({
